@@ -51,39 +51,26 @@ public class Main {
 *(Method availability may vary by version.)*
 
 ---
+## Installation
 
-## Getting Started
+### A) GitHub Packages (Recommended)
 
-1. Clone the repository:
-
-```bash
-git clone https://github.com/JakkoKoba/jquill.git
+1. Add the repository to the pom.xml file:
+```xml
+<repositories>
+  <repository>
+    <id>github</id>
+    <name>GitHub Packages</name>
+    <url>https://maven.pkg.github.com/JakkoKoba/jquill</url>
+  </repository>
+</repositories>
 ```
 
-2. Navigate to the project directory:
-
-```bash
-cd jquill
-```
-
-3. Build the library with Maven:
-
-```bash
-mvn clean package
-```
-
-4. Install locally (optional):
-
-```bash
-mvn install
-```
-
-5. Add dependency to your project:
-
+2. Add the dependency:
 ```xml
 <dependency>
-  <groupId>org.jquill</groupId>
+  <groupId>io.github.jakkokoba</groupId>
   <artifactId>jquill</artifactId>
-  <version>0.1.0</version>
+  <version>1.0.0</version>
 </dependency>
 ```
