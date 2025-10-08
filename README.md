@@ -24,15 +24,16 @@ It was originally designed as a companion to **JCMD**, offering a simple way to 
 ## Example Usage
 
 ```java
+import org.jquill.Debug;
 import org.jquill.JQuill;
 
 public class Main {
     public static void main(String[] args) {
-        JQuill.info("Starting application...");
-        JQuill.debug("Loading modules...");
-        JQuill.warn("Deprecated configuration detected.");
-        JQuill.success("Modules loaded successfully!");
-        JQuill.error("Failed to load optional plugin!");
+        Debug.info("Starting application...");
+        Debug.debug("Loading modules...");
+        Debug.warn("Deprecated configuration detected.");
+        Debug.success("Modules loaded successfully!");
+        Debug.error("Failed to load optional plugin!");
     }
 }
 ```

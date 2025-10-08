@@ -7,12 +7,34 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.jquill</groupId>
-    <artifactId>JQuill</artifactId>
-    <version>0.1.0</version>
+    <artifactId>jquill</artifactId>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <name>JQuill</name>
-    <description>JQuill is a lightweight Java utility library providing helpful classes and methods to simplify common development tasks.</description>
+    <description>Lightweight Java utility library providing helpful classes and methods to simplify common development tasks.</description>
+    <url>https://github.com/YourUsername/jquill</url>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>JakkoKoba</id>
+            <name>Jakko Koba</name>
+            <url>https://github.com/JakkoKoba</url>
+        </developer>
+    </developers>
+
+    <scm>
+        <url>https://github.com/JakkoKoba/JQuill</url>
+        <connection>scm:git:git://github.com/JakkoKoba/JQuill.git</connection>
+        <developerConnection>scm:git:ssh://github.com/JakkoKoba/JQuill.git</developerConnection>
+    </scm>
 
     <properties>
         <maven.compiler.source>24</maven.compiler.source>
@@ -20,8 +42,40 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/JakkoKoba/JQuill</url>
+        </repository>
+    </distributionManagement>
+
     <build>
-        <finalName>jquill</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
     </build>
 
 </project>

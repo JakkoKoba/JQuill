@@ -1,6 +1,6 @@
 package org.jquill;
 
-public class JQuill {
+public class Debug {
 
     public static final String RESET = "\u001B[0m";
     public static final String GRAY = "\u001B[38;2;108;117;125m";
@@ -33,11 +33,11 @@ public class JQuill {
         else System.out.println(RED + "! " + message + RESET);
     }
 
-    public static void debug(String message) {
-        debug(message, false);
+    public static void log(String message) {
+        log(message, false);
     }
-    public static void debug(String message, boolean showType) {
-        if (showType) System.out.println(GRAY + "[DEBUG] " + message + RESET);
+    public static void log(String message, boolean showType) {
+        if (showType) System.out.println(GRAY + "[LOG] " + message + RESET);
         else System.out.println(GRAY + "» " + message + RESET);
     }
 
