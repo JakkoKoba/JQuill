@@ -10,22 +10,42 @@ public class JQuill {
     private static final String GRAY = "\u001B[90m";
 
     public static void info(String message) {
-        System.out.println(CYAN + "ⓘ INFO: " + message + RESET);
+        info(message, false);
+    }
+    public static void info(String message, boolean showType) {
+        if (showType) System.out.println(CYAN + "ⓘ INFO: " + message + RESET);
+        else System.out.println(CYAN + "ⓘ " + message + RESET);
     }
 
     public static void warn(String message) {
-        System.out.println(YELLOW + "⚠ WARN: " + message + RESET);
+        warn(message, false);
+    }
+    public static void warn(String message, boolean showType) {
+        if (showType) System.out.println(YELLOW + "⚠ WARN: " + message + RESET);
+        else System.out.println(YELLOW + "⚠ " + message + RESET);
     }
 
     public static void error(String message) {
-        System.out.println(RED + "⚠ ERROR: " + message + RESET);
+        error(message, false);
+    }
+    public static void error(String message, boolean showType) {
+        if (showType) System.out.println(RED + "⚠ ERROR: " + message + RESET);
+        else System.out.println(RED + "⚠ " + message + RESET);
     }
 
     public static void debug(String message) {
-        System.out.println(GRAY + "» DEBUG: " + message + RESET);
+        debug(message, false);
+    }
+    public static void debug(String message, boolean showType) {
+        if (showType) System.out.println(GRAY + "» DEBUG: " + message + RESET);
+        else System.out.println(GRAY + "» " + message + RESET);
     }
 
     public static void success(String message) {
-        System.out.println(GREEN + "✓ SUCCESS: " + message + RESET);
+        success(message, false);
+    }
+    public static void success(String message, boolean showType) {
+        if (showType) System.out.println(GREEN + "✓ SUCCESS: " + message + RESET);
+        else System.out.println(GREEN + "✓ " + message + RESET);
     }
 }
