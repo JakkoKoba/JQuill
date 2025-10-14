@@ -25,7 +25,6 @@ It was originally designed as a companion to **JCMD**, offering a simple way to 
 
 ```java
 import org.jquill.Debug;
-import org.jquill.JQuill;
 
 public class Main {
     public static void main(String[] args) {
@@ -40,13 +39,13 @@ public class Main {
 
 ## Handy Methods
 
-| Method                               | Description                         |
-| ------------------------------------ | ----------------------------------- |
-| `info(String msg)`                   | Prints an informational message     |
-| `debug(String msg)`                  | Prints a debug message              |
-| `error(String msg)`                  | Prints an error message             |
-| `warn(String msg)`                   | Prints a warning message            |
-| `success(String msg)`                | Prints a success message            |
+| Method                | Description                         |
+|-----------------------| ----------------------------------- |
+| `info(String msg)`    | Prints an informational message     |
+| `log(String msg)`       | Prints a debug message              |
+| `error(String msg)`   | Prints an error message             |
+| `warn(String msg)`    | Prints a warning message            |
+| `success(String msg)` | Prints a success message            |
 
 *(Method availability may vary by version.)*
 
