@@ -98,7 +98,7 @@ public class Main {
 </repositories>
 ```
 
-2. Add the dependency:
+3Add the dependency:
 ```xml
 <dependency>
   <groupId>io.github.jakkokoba</groupId>
