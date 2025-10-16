@@ -89,7 +89,7 @@ public class Main {
 
 > ⚠️ Make sure <id> matches the repository <id> below (github).
 
-2. Add the repository to the pom.xml file:
+#### 2. Add the repository to the pom.xml file:
 ```xml
 <repositories>
   <repository>
@@ -100,7 +100,7 @@ public class Main {
 </repositories>
 ```
 
-3. Add the dependency:
+#### 3. Add the dependency:
 ```xml
 <dependency>
   <groupId>io.github.jakkokoba</groupId>
