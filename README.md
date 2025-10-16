@@ -47,7 +47,9 @@ public class Main {
 | `error(String msg)`                    | Prints an error message. Honors `showType` and `showTime` flags.                        |
 | `success(String msg)`                  | Prints a success message. Honors `showType` and `showTime` flags.                       |
 | `print(String msg, Style... styles)`   | Prints a message without newline. Supports custom text styling using `Style` instances. |
-| `println(String msg, Style... styles)` | Prints a message with newline. Supports custom text styling using `Style` instances.        |
+| `println(String msg, Style... styles)` | Prints a message with newline. Supports custom text styling using `Style` instances.    |
+| `sleep(int seconds)`                   | Pause the program for a declared amount of seconds.                                     |
+| `newLine(int lines)`                   | Print a specific number of new lines.                                                   |
 
 *(Method availability and formatting behavior may vary by version. Prefixes and timestamps depend on `showType`, `showTime`, and `useRunTime` settings.)*
 
@@ -98,11 +100,11 @@ public class Main {
 </repositories>
 ```
 
-3Add the dependency:
+3. Add the dependency:
 ```xml
 <dependency>
   <groupId>io.github.jakkokoba</groupId>
   <artifactId>jquill</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
 </dependency>
 ```
