@@ -87,7 +87,7 @@ public class Debug {
                 line = coloredPrefix + message;
             } else {
                 // All other levels: no coloring at all
-                line = style.getCode() + prefix  + message;
+                line = style.getCode() + prefix  + message + Style.RESET.getCode();
             }
 
             out.println(line);
