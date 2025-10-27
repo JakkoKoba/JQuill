@@ -2,10 +2,13 @@ name: JQuill CI
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - ci-test
   pull_request:
-    branches: [main]
-
+    branches:
+      - main
+      - ci-test
 jobs:
   build:
     runs-on: ubuntu-latest

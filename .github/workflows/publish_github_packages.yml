@@ -4,6 +4,13 @@ on:
   push:
     tags:
       - 'v*'
+    branches:
+      - main
+      - ci-test
+  pull_request:
+    branches:
+      - main
+      - ci-test
 
 jobs:
   publish:
