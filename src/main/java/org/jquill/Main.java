@@ -1,21 +1,35 @@
 package org.jquill;
 
 public class Main {
-    public static void main(String[] args) {
-        Debug.setLevel(Level.LOW);
-        Debug.setShowThread(true);
-        Debug.setShowType(false);
+    public static void main(String[] args) throws InterruptedException {
+        Debug.setShowThread(true);                // Show thread names
+        Debug.setTimeMode(TimeMode.ABSOLUTE);     // Use absolute timestamp
 
-        Debug.setTimeMode(TimeMode.ELAPSED);
+        // Basic Logging
+        Debug.info("Starting application...");
+        Debug.log("Loading modules...");
+        Debug.warn("Deprecated configuration detected.");
+        Debug.error("Failed to load optional plugin!");
+        Debug.success("Modules loaded successfully!");
 
-        Debug.info("Info");
-        Debug.warn("Warn");
-        Debug.error(Style.apply("Error"));
-        Debug.success("Success");
-        Debug.log("Log");
+        // Styled Output
+        Debug.println("Custom styled message", Style.BOLD.and(Style.PURPLE));
+        Debug.println("Background + foreground", Style.BG_WHITE.and(Style.BLACK).and(Style.UNDERLINE));
 
-        String part1 = Style.apply("This is part 1: ", Style.BLUE);
-        Debug.println(Style.lock(part1) + "x", Style.RED);
-        System.out.println(Style.apply(Style.lock("x ") + "+ y = z", Style.PURPLE));
+        // Inline Open/Close
+        Debug.print(Style.open(Style.GREEN, Style.BOLD));
+        Debug.print("Partial styled text ");
+        Debug.println(Style.close() + "Normal text");
+
+        // Chained Styles
+        Debug.println("All styles demo", Style.BOLD.and(Style.RED).and(Style.UNDERLINE));
+
+        // Lock + Apply Example
+        String lockedMessage = Style.lock("DO NOT MODIFY");
+        String styled = Style.apply("Message with " + lockedMessage + " inside", Style.AMBER);
+        Debug.println(styled);
+
+        // Finish
+        Debug.info("Application finished!");
     }
 }

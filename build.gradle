@@ -1,0 +1,49 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.github.jakkokoba'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+    maven {
+        url = uri("https://maven.pkg.github.com/JakkoKoba/JQuill")
+        credentials {
+            username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+            password = project.findProperty("gpr.token") ?: System.getenv("GITHUB_TOKEN")
+        }
+    }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_24
+    targetCompatibility = JavaVersion.VERSION_24
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.13.2'
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+tasks.test {
+    useJUnit()
+}
+
+jar {
+    archiveBaseName.set('jquill')
+    from sourceSets.main.allSource
+}
+
+// Modern Gradle 9+ way to define sourcesJar
+tasks.register('sourcesJar', Jar) {
+    archiveClassifier.set('sources')
+    from(sourceSets.main.allSource)
+}
+
+artifacts {
+    archives(tasks.named('sourcesJar'))
+}

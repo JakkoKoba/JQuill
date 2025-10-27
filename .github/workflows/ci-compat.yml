@@ -1,0 +1,66 @@
+name: JQuill CI
+
+on:
+  push:
+    branches:
+      - main
+      - ci-test
+  pull_request:
+    branches:
+      - main
+      - ci-test
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [ 17, 20, 24, 25 ]
+        build: [ maven, gradle ]
+        mavenVersion: [ "3.8.8", "3.9.11" ]
+        gradleVersion: [ "8.3", "8.4" ]
+    continue-on-error: true
+    name: Java ${{ matrix.java }} + ${{ matrix.build }}
+    outputs:
+      result-table: ${{ steps.set-table.outputs.table }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+
+      - name: Setup Build Tool
+        run: |
+          if [ "${{ matrix.build }}" == "maven" ]; then
+            echo "Using Maven ${{ matrix.mavenVersion }}"
+            curl -sL https://archive.apache.org/dist/maven/maven-3/${{ matrix.mavenVersion }}/binaries/apache-maven-${{ matrix.mavenVersion }}-bin.zip -o maven.zip
+            unzip maven.zip
+            export PATH="$PWD/apache-maven-${{ matrix.mavenVersion }}/bin:$PATH"
+          else
+            echo "Using Gradle ${{ matrix.gradleVersion }}"
+            wget https://services.gradle.org/distributions/gradle-${{ matrix.gradleVersion }}-bin.zip -O gradle.zip
+            unzip gradle.zip
+            export PATH="$PWD/gradle-${{ matrix.gradleVersion }}/bin:$PATH"
+          fi
+
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.m2/repository
+            ~/.gradle
+          key: ${{ runner.os }}-build-${{ matrix.build }}-${{ hashFiles('**/pom.xml','**/build.gradle') }}
+
+      - name: Build Project
+        id: build
+        run: |
+          if [ "${{ matrix.build }}" == "maven" ]; then
+            mvn clean install -B
+          else
+            gradle clean build --console=plain
+          fi
+        continue-on-error: true
