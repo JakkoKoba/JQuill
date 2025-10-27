@@ -74,36 +74,10 @@ public class Main {
 
 ### A) GitHub Packages (Recommended)
 
-#### 1. Set up Maven authentication
-1. Create a GitHub personal access token with `read:packages` scope.
-2. Add it to your Maven `settings.xml` (usually in `~/.m2/settings.xml`):
-```xml
-<servers>
-  <server>
-    <id>github</id>
-    <username>YOUR_GITHUB_USERNAME</username>
-    <password>YOUR_PERSONAL_ACCESS_TOKEN</password>
-  </server>
-</servers>
-```
-
-> ⚠️ Make sure <id> matches the repository <id> below (github).
-
-#### 2. Add the repository to the pom.xml file:
-```xml
-<repositories>
-  <repository>
-    <id>github</id>
-    <name>GitHub Packages</name>
-    <url>https://maven.pkg.github.com/JakkoKoba/jquill</url>
-  </repository>
-</repositories>
-```
-
-#### 3. Add the dependency:
+#### Add the dependency:
 ```xml
 <dependency>
-  <groupId>io.github.jakkokoba</groupId>
+  <groupId>com.github.jakkokoba</groupId>
   <artifactId>jquill</artifactId>
   <version>1.0.1</version>
 </dependency>

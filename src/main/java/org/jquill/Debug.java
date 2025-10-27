@@ -3,174 +3,160 @@ package org.jquill;
 import java.io.PrintStream;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Objects;
 
-public class Debug {
-    private static final PrintStream out = System.out;
-
-    private static volatile boolean showType = false;
-    private static volatile TimeMode timeMode = TimeMode.ELAPSED;
-    private static volatile Level currentLevel = Level.LOW; // default: show all
-    private static volatile String timeFormat = "HH:mm:ss";
-
+public final class Debug {
+    private static final PrintStream OUT = System.out;
     private static final long START_TIME = System.currentTimeMillis();
 
-    // ------------------ Helper Commands ------------------
-    private static String getTime() {
-        switch (timeMode) {
-            case ABSOLUTE:
-                return "[" + LocalTime.now().format(DateTimeFormatter.ofPattern(timeFormat)) + "] ";
-            case ELAPSED:
-                long elapsed = System.currentTimeMillis() - START_TIME;
-                long milliseconds = elapsed % 1000;
-                long seconds = (elapsed / 1000) % 60;
-                long minutes = (elapsed / (1000 * 60)) % 60;
-                return String.format("[%02d:%02d:%03d] ", minutes, seconds, milliseconds);
-            default:
-                return "";
-        }
+    private static volatile boolean showType = false;
+    private static volatile boolean showThread = false;
+    private static volatile TimeMode timeMode = TimeMode.ELAPSED;
+    private static volatile Level currentLevel = Level.LOW; // Default: show all
+    private static volatile String timeFormat = "HH:mm:ss";
+
+    private Debug() {
+        // Utility class — prevent instantiation
     }
 
+    // ------------------ Time & Thread Helpers ------------------
+
+    private static String formatTime() {
+        if (timeMode == TimeMode.ABSOLUTE) {
+            return "[" + LocalTime.now().format(DateTimeFormatter.ofPattern(timeFormat)) + "] ";
+        } else if (timeMode == TimeMode.ELAPSED) {
+            long elapsed = System.currentTimeMillis() - START_TIME;
+            long ms = elapsed % 1000;
+            long s = (elapsed / 1000) % 60;
+            long m = (elapsed / (1000 * 60)) % 60;
+            return String.format("[%02d:%02d:%03d] ", m, s, ms);
+        }
+        return "";
+    }
+
+    private static String formatThread() {
+        return "[" + Thread.currentThread().getName() + "] ";
+    }
 
     // ------------------ Core Print ------------------
-    public static void print(String msg) {
-        out.print(msg);
-    }
+
     public static void print(String msg, Style... styles) {
-        out.print(Style.apply(msg, styles));
+        StringBuilder sb = new StringBuilder();
+        OUT.print(Style.processLocks(sb, msg, styles));
     }
 
-    public static void println(String msg) {
-        out.println(msg);
-    }
     public static void println(String msg, Style... styles) {
-        out.println(Style.apply(msg, styles));
+        StringBuilder sb = new StringBuilder();
+        OUT.println(Style.processLocks(sb, msg, styles));
     }
 
-    public static void newLine() {
-        newLine(1);
-    }
-    public static void newLine(int number) {
-        for (int i = 0; i < number; i++) out.println();
-    }
+    // ------------------ Unified Output ------------------
 
-    // ------------------ Unified Formatted Print ------------------
-    private static void printFormatted(Level level, String message, Style style, String typeLabel, boolean showTypePrefix) {
-        synchronized (Debug.class) {
-            if (level.getPriority() < currentLevel.getPriority()) {
-                return; // skip messages below current level
-            }
+    private static void print(Level level, String label, String message, Style style, boolean showTypePrefix) {
+        if (level.getPriority() < currentLevel.getPriority()) return;
 
-            String timeStr = getTime();
+        StringBuilder sb = new StringBuilder();
+        StringBuilder prefix = new StringBuilder();
 
-            // Determine prefix (type label or symbol)
-            String prefix;
-            if (showTypePrefix) {
-                prefix = timeStr + typeLabel;
-            } else {
-                prefix = switch (typeLabel.trim()) {
-                    case "[INFO]" -> "¡ ";
-                    case "[LOG]" -> "• ";
-                    case "[WARN]" -> "? ";
-                    case "[ERROR]" -> "✖ ";
-                    case "[SUCCESS]" -> "✔ ";
-                    default -> "";
-                };
-                prefix += timeStr;
-            }
+        if (showThread) {
+            prefix.append(Style.lock(formatThread()));
+        }
 
-            String line;
+        if (showTypePrefix) {
+            prefix.append(label);
+        } else {
+            prefix.append(switch (label.trim()) {
+                case "[INFO]" -> "i ";
+                case "[LOG]" -> "* ";
+                case "[WARN]" -> "? ";
+                case "[ERROR]" -> "x ";
+                case "[SUCCESS]" -> "+ ";
+                default -> "";
+            });
+        }
 
-            // Only color prefix + time for INFO messages
-            if (Objects.equals(typeLabel.trim(), "[INFO]")) {
-                String coloredPrefix = style.getCode() + prefix + Style.RESET.getCode();
-                line = coloredPrefix + message;
-            } else {
-                // All other levels: no coloring at all
-                line = style.getCode() + prefix  + message + Style.RESET.getCode();
-            }
+        prefix.append(formatTime());
+        prefix.append(message);
 
-            out.println(line);
+        synchronized (OUT) { // synchronize output, not class-level
+            OUT.println(Style.processLocks(sb, prefix.toString(), style));
         }
     }
 
-    // ------------------ Custom Print Methods ------------------
-    public static void info(String message) {
-        info(message, showType);
-    }
-    public static void info(String message, boolean showTypePrefix) {
-        String label = "[INFO]    ";
-        printFormatted(Level.LOW, message, Style.CYAN, label, showTypePrefix);
+    // ------------------ Level Shortcuts ------------------
+
+    public static void info(String msg) { info(msg, null); }
+    public static void info(String msg, Boolean override) {
+        print(Level.LOW, "[INFO]    ", msg, Style.INFO, override != null ? override : showType);
     }
 
-    public static void warn(String message) {
-        warn(message, showType);
-    }
-    public static void warn(String message, boolean showTypePrefix) {
-        String label = "[WARN]    ";
-        printFormatted(Level.HIGH, message, Style.AMBER, label, showTypePrefix);
+    public static void log(String msg) { log(msg, null); }
+    public static void log(String msg, Boolean override) {
+        print(Level.LOW, "[LOG]     ", msg, Style.LOG, override != null ? override : showType);
     }
 
-    public static void error(String message) {
-        error(message, showType);
-    }
-    public static void error(String message, boolean showTypePrefix) {
-        String label = "[ERROR]   ";
-        printFormatted(Level.HIGH, message, Style.RED, label, showTypePrefix);
+    public static void warn(String msg) { warn(msg, null); }
+    public static void warn(String msg, Boolean override) {
+        print(Level.HIGH, "[WARN]    ", msg, Style.WARNING, override != null ? override : showType);
     }
 
-    public static void log(String message) {
-        log(message, showType);
-    }
-    public static void log(String message, boolean showTypePrefix) {
-        String label = "[LOG]     ";
-        printFormatted(Level.LOW, message, Style.GRAY, label, showTypePrefix);
+    public static void error(String msg) { error(msg, null); }
+    public static void error(String msg, Boolean override) {
+        print(Level.HIGH, "[ERROR]   ", msg, Style.ERROR, override != null ? override : showType);
     }
 
-    public static void success(String message) {
-        success(message, showType);
-    }
-    public static void success(String message, boolean showTypePrefix) {
-        String label = "[SUCCESS] ";
-        printFormatted(Level.HIGH, message, Style.GREEN, label, showTypePrefix);
+    public static void success(String msg) { success(msg, null); }
+    public static void success(String msg, Boolean override) {
+        print(Level.HIGH, "[SUCCESS] ", msg, Style.SUCCESS, override != null ? override : showType);
     }
 
-    // ------------------ Wait Method ------------------
+    // ------------------ Sleep ------------------
+
     public static void sleep(int seconds) throws InterruptedException {
-        int s = seconds * 1000;
-        Thread.sleep(s);
-        Debug.info("Slept for: " + seconds + "s.");
+        Thread.sleep(seconds * 1000L);
+        info("Slept for: " + seconds + "s.");
     }
 
-    // ------------------ Get and Set Methods ------------------
+    // ------------------ Configuration ------------------
+
     public static void setLevel(Level level) {
-        currentLevel = level;
+        currentLevel = level != null ? level : Level.LOW;
     }
+
     public static Level getLevel() {
         return currentLevel;
     }
 
-    public static boolean getShowType() {
+    public static void setShowType(boolean value) {
+        showType = value;
+    }
+
+    public static boolean isShowType() {
         return showType;
     }
 
-    public static void setShowType(boolean input) {
-        showType = input;
-    }
-
-    public static void setTimeMode(TimeMode input) {
-        timeMode = input;
+    public static void setTimeMode(TimeMode mode) {
+        timeMode = mode != null ? mode : TimeMode.ELAPSED;
     }
 
     public static TimeMode getTimeMode() {
         return timeMode;
     }
 
+    public static void setTimeFormat(String format) {
+        if (format != null && !format.isBlank()) {
+            timeFormat = format;
+        }
+    }
+
     public static String getTimeFormat() {
         return timeFormat;
     }
 
-    public static void setTimeFormat(String input) {
-        timeFormat = input;
+    public static void setShowThread(boolean value) {
+        showThread = value;
+    }
+
+    public static boolean isShowThread() {
+        return showThread;
     }
 }

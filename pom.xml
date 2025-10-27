@@ -6,10 +6,17 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.github.jakkokoba</groupId>
+    <groupId>com.github.jakkokoba</groupId>
     <artifactId>jquill</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
+
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
 
     <name>JQuill</name>
     <description>Lightweight Java utility library providing helpful classes and methods to simplify common development tasks.</description>
@@ -42,14 +49,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <distributionManagement>
-        <repository>
-            <id>github</id>
-            <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/JakkoKoba/JQuill</url>
-        </repository>
-    </distributionManagement>
-
     <build>
         <plugins>
             <plugin>
@@ -72,6 +71,13 @@
                         <goals>
                             <goal>jar</goal>
                         </goals>
+                        <configuration>
+                            <excludes>
+                                <exclude>
+                                    **/Main.java
+                                </exclude>
+                            </excludes>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
