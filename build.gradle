@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'com.github.jakkokoba'
-version = '1.0.1'
+version = '1.0.0'
 
 repositories {
     mavenCentral()
@@ -38,11 +38,12 @@ jar {
     from sourceSets.main.allSource
 }
 
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
+// Modern Gradle 9+ way to define sourcesJar
+tasks.register('sourcesJar', Jar) {
+    archiveClassifier.set('sources')
+    from(sourceSets.main.allSource)
 }
 
 artifacts {
-    archives sourcesJar
+    archives(tasks.named('sourcesJar'))
 }

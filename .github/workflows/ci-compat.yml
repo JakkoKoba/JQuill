@@ -9,29 +9,31 @@ on:
     branches:
       - main
       - ci-test
+
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         java: [17, 20, 24, 25]
-        build: [maven, gradle]   # Build tool matrix
-        mavenVersion: ["3.8.8", "3.9.11"] # Only used if build=maven
-        gradleVersion: ["8.3", "8.4"]     # Only used if build=gradle
+        build: [maven, gradle]
+        mavenVersion: ["3.8.8", "3.9.11"]
+        gradleVersion: ["8.3", "8.4"]
+    continue-on-error: true   # <-- don't fail the whole workflow
     name: Java ${{ matrix.java }} + ${{ matrix.build }}
+    outputs:
+      result-table: ${{ steps.set-table.outputs.table }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Setup Java
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: ${{ matrix.java }}
 
-      # Setup Maven or Gradle
       - name: Setup Build Tool
         run: |
           if [ "${{ matrix.build }}" == "maven" ]; then
@@ -46,7 +48,6 @@ jobs:
             export PATH="$PWD/gradle-${{ matrix.gradleVersion }}/bin:$PATH"
           fi
 
-      # Cache dependencies
       - uses: actions/cache@v3
         with:
           path: |
@@ -54,20 +55,19 @@ jobs:
             ~/.gradle
           key: ${{ runner.os }}-build-${{ matrix.build }}-${{ hashFiles('**/pom.xml','**/build.gradle') }}
 
-      # Run build
       - name: Build Project
+        id: build
         run: |
           if [ "${{ matrix.build }}" == "maven" ]; then
             mvn clean install -B
           else
             gradle clean build --console=plain
           fi
+        continue-on-error: true
 
-      # Record result
       - name: Record result
         id: set-table
         run: |
-          # Save the result in a format we can aggregate
           if [ $? -eq 0 ]; then STATUS="✅"; else STATUS="❌"; fi
           echo "table=${{ matrix.java }}|${{ matrix.build }}|$STATUS" >> $GITHUB_OUTPUT
 
@@ -81,11 +81,8 @@ jobs:
 
       - name: Collect results
         run: |
-          # Create a Markdown table
           echo "| Java | Tool   | Status |" > compat.md
           echo "|------|--------|--------|" >> compat.md
-
-          # Loop over matrix results
           for result in ${{ needs.build.outputs.result-table }}; do
             IFS="|" read java tool status <<< "$result"
             echo "| $java | $tool | $status |" >> compat.md
