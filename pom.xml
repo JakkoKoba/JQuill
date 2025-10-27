@@ -19,16 +19,6 @@
         </repository>
     </distributionManagement>
 
-    <settings>
-        <servers>
-            <server>
-                <id>github</id>
-                <username>JakkoKoba</username>
-                <password>${GITHUB_TOKEN}</password>
-            </server>
-        </servers>
-    </settings>
-
     <repositories>
         <repository>
             <id>jitpack.io</id>
