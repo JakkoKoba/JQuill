@@ -15,10 +15,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [17, 20, 24, 25]
-        build: [maven, gradle]
-        mavenVersion: ["3.8.8", "3.9.11"]
-        gradleVersion: ["8.3", "8.4"]
+        java: [ 17, 20, 24, 25 ]
+        build: [ maven, gradle ]
+        mavenVersion: [ "3.8.8", "3.9.11" ]
+        gradleVersion: [ "8.3", "8.4" ]
     continue-on-error: true   # <-- don't fail the whole workflow
     name: Java ${{ matrix.java }} + ${{ matrix.build }}
     outputs:
@@ -81,8 +81,11 @@ jobs:
 
       - name: Collect results
         run: |
-          echo "| Java | Tool   | Status |" > compat.md
-          echo "|------|--------|--------|" >> compat.md
+          # Initialize Markdown table
+          echo '| Java | Tool | Status |' > compat.md
+          echo '|------|------|--------|' >> compat.md
+
+          # Loop over results from build matrix
           for result in ${{ needs.build.outputs.result-table }}; do
             IFS="|" read java tool status <<< "$result"
             echo "| $java | $tool | $status |" >> compat.md
@@ -90,8 +93,11 @@ jobs:
 
       - name: Update README
         run: |
-          sed -i '/<!-- COMPAT_TABLE_START -->/,/<!-- COMPAT_TABLE_END -->/c\
-          <!-- COMPAT_TABLE_START -->\n'"$(cat compat.md)"'\n<!-- COMPAT_TABLE_END -->' README.md
+          awk '
+            /<!-- COMPAT_TABLE_START -->/{print; while(getline < "compat.md") print; 
+              skip=1; next} 
+            /<!-- COMPAT_TABLE_END -->/{skip=0} 
+            !skip{print}' README.md > README.tmp && mv README.tmp README.md      
 
       - name: Commit README
         run: |
