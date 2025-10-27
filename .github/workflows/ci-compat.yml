@@ -87,8 +87,9 @@ jobs:
 
           # Loop over results from build matrix
           for result in ${{ needs.build.outputs.result-table }}; do
-            IFS="|" read java tool status <<< "$result"
-            echo "| $java | $tool | $status |" >> compat.md
+            echo "$result" | while IFS="|" read java tool status; do
+              echo "| $java | $tool | $status |" >> compat.md
+            done
           done
 
       - name: Update README
