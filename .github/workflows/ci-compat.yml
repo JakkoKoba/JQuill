@@ -19,7 +19,7 @@ jobs:
         build: [ maven, gradle ]
         mavenVersion: [ "3.8.8", "3.9.11" ]
         gradleVersion: [ "8.3", "8.4" ]
-    continue-on-error: true   # <-- don't fail the whole workflow
+    continue-on-error: true
     name: Java ${{ matrix.java }} + ${{ matrix.build }}
     outputs:
       result-table: ${{ steps.set-table.outputs.table }}
@@ -64,46 +64,3 @@ jobs:
             gradle clean build --console=plain
           fi
         continue-on-error: true
-
-      - name: Record result
-        id: set-table
-        run: |
-          if [ $? -eq 0 ]; then STATUS="✅"; else STATUS="❌"; fi
-          echo "table=${{ matrix.java }}|${{ matrix.build }}|$STATUS" >> $GITHUB_OUTPUT
-
-  aggregate:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          persist-credentials: true
-
-      - name: Collect results
-        run: |
-          # Initialize Markdown table
-          echo '| Java | Tool | Status |' > compat.md
-          echo '|------|------|--------|' >> compat.md
-
-          # Loop over results from build matrix
-          for result in ${{ needs.build.outputs.result-table }}; do
-            echo "$result" | while IFS="|" read java tool status; do
-              echo "| $java | $tool | $status |" >> compat.md
-            done
-          done
-
-      - name: Update README
-        run: |
-          awk '
-            /<!-- COMPAT_TABLE_START -->/{print; while(getline < "compat.md") print; 
-              skip=1; next} 
-            /<!-- COMPAT_TABLE_END -->/{skip=0} 
-            !skip{print}' README.md > README.tmp && mv README.tmp README.md      
-
-      - name: Commit README
-        run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-          git add README.md
-          git commit -m "Update Java/Build tool compatibility table [skip ci]" || echo "No changes"
-          git push

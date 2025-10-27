@@ -18,8 +18,13 @@ Originally designed as a companion to **JCMD**, it provides a concise, styled in
 
 ## 🧩 Requirements
 
-<!-- COMPAT_TABLE_START -->
-<!-- COMPAT_TABLE_END -->
+
+| Java | Maven | Gradle |
+|------|-------|-------|
+| 17   | ✅     | ✅     |
+| 20   | ✅     | ✅     |
+| 24   | ✅     | ✅     |
+| 25   | ✅     | ✅     |
 
 ---
 
