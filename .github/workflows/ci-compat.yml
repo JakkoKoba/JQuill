@@ -2,65 +2,65 @@ name: JQuill CI
 
 on:
   push:
-    branches:
-      - main
-      - ci-test
+    branches: [main, ci-test]
   pull_request:
-    branches:
-      - main
-      - ci-test
+    branches: [main, ci-test]
+
+permissions:
+  contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [ 17, 20, 24, 25 ]
-        build: [ maven, gradle ]
-        mavenVersion: [ "3.8.8", "3.9.11" ]
-        gradleVersion: [ "8.3", "8.4" ]
+        include:
+          - build: maven
+            java: 17
+            mavenVersion: "3.8.8"
+          - build: maven
+            java: 21
+            mavenVersion: "3.9.11"
+          - build: gradle
+            java: 17
+            gradleVersion: "8.3"
+          - build: gradle
+            java: 21
+            gradleVersion: "8.4"
     continue-on-error: true
     name: Java ${{ matrix.java }} + ${{ matrix.build }}
-    outputs:
-      result-table: ${{ steps.set-table.outputs.table }}
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: ${{ matrix.java }}
 
-      - name: Setup Build Tool
-        run: |
-          if [ "${{ matrix.build }}" == "maven" ]; then
-            echo "Using Maven ${{ matrix.mavenVersion }}"
-            curl -sL https://archive.apache.org/dist/maven/maven-3/${{ matrix.mavenVersion }}/binaries/apache-maven-${{ matrix.mavenVersion }}-bin.zip -o maven.zip
-            unzip maven.zip
-            export PATH="$PWD/apache-maven-${{ matrix.mavenVersion }}/bin:$PATH"
-          else
-            echo "Using Gradle ${{ matrix.gradleVersion }}"
-            wget https://services.gradle.org/distributions/gradle-${{ matrix.gradleVersion }}-bin.zip -O gradle.zip
-            unzip gradle.zip
-            export PATH="$PWD/gradle-${{ matrix.gradleVersion }}/bin:$PATH"
-          fi
+      - name: Setup Maven
+        if: matrix.build == 'maven'
+        uses: stCarolas/setup-maven@v4
+        with:
+          maven-version: ${{ matrix.mavenVersion }}
+
+      - name: Setup Gradle
+        if: matrix.build == 'gradle'
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: ${{ matrix.gradleVersion }}
 
       - uses: actions/cache@v3
         with:
-          path: |
-            ~/.m2/repository
-            ~/.gradle
-          key: ${{ runner.os }}-build-${{ matrix.build }}-${{ hashFiles('**/pom.xml','**/build.gradle') }}
+          path: ${{ matrix.build == 'maven' && '~/.m2/repository' || '~/.gradle/caches' }}
+          key: ${{ runner.os }}-${{ matrix.build }}-${{ hashFiles('**/pom.xml','**/build.gradle') }}
 
       - name: Build Project
-        id: build
         run: |
           if [ "${{ matrix.build }}" == "maven" ]; then
-            mvn clean install -B
+            mvn -B -T 1C clean install
           else
-            gradle clean build --console=plain
+            gradle --parallel clean build --console=plain
           fi
-        continue-on-error: true
