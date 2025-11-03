@@ -61,15 +61,9 @@ jobs:
       - name: Setup Build Tool
         run: |
           if [ "${{ matrix.build }}" == "maven" ]; then
-            echo "Using Maven ${{ matrix.mavenVersion }}"
-            curl -sL https://archive.apache.org/dist/maven/maven-3/${{ matrix.mavenVersion }}/binaries/apache-maven-${{ matrix.mavenVersion }}-bin.zip -o maven.zip
-            unzip -q maven.zip
-            export PATH="$PWD/apache-maven-${{ matrix.mavenVersion }}/bin:$PATH"
+            mvn -B clean install -Dgpg.skip=true
           else
-            echo "Using Gradle ${{ matrix.gradleVersion }}"
-            wget -q https://services.gradle.org/distributions/gradle-${{ matrix.gradleVersion }}-bin.zip -O gradle.zip
-            unzip -q gradle.zip
-            export PATH="$PWD/gradle-${{ matrix.gradleVersion }}/bin:$PATH"
+            gradle --parallel clean build --console=plain
           fi
 
       - uses: actions/cache@v3
