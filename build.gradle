@@ -1,13 +1,25 @@
 plugins {
     id 'java'
+    id 'maven-publish'
+    id 'signing'
 }
 
-group = 'com.github.jakkokoba'
+group = 'io.github.jakkokoba'
 version = '1.0.0'
+description = 'Lightweight Java utility library providing helpful classes and methods to simplify common development tasks.'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+    withSourcesJar()
+    withJavadocJar()
+}
 
 repositories {
     mavenCentral()
     maven {
+        name = "GitHubPackages"
         url = uri("https://maven.pkg.github.com/JakkoKoba/JQuill")
         credentials {
             username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
@@ -16,16 +28,11 @@ repositories {
     }
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_24
-    targetCompatibility = JavaVersion.VERSION_24
-}
-
 dependencies {
     testImplementation 'junit:junit:4.13.2'
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
@@ -33,17 +40,74 @@ tasks.test {
     useJUnit()
 }
 
-jar {
-    archiveBaseName.set('jquill')
-    from sourceSets.main.allSource
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            groupId = 'io.github.jakkokoba'
+            artifactId = 'jquill'
+            version = project.version
+
+            pom {
+                name.set('JQuill')
+                description.set(project.description)
+                url.set('https://github.com/JakkoKoba/JQuill')
+
+                licenses {
+                    license {
+                        name.set('MIT License')
+                        url.set('https://opensource.org/licenses/MIT')
+                    }
+                }
+
+                developers {
+                    developer {
+                        id.set('JakkoKoba')
+                        name.set('Jakko Koba')
+                        url.set('https://github.com/JakkoKoba')
+                    }
+                }
+
+                scm {
+                    connection.set('scm:git:git://github.com/JakkoKoba/JQuill.git')
+                    developerConnection.set('scm:git:ssh://github.com/JakkoKoba/JQuill.git')
+                    url.set('https://github.com/JakkoKoba/JQuill')
+                }
+            }
+        }
+    }
+
+    repositories {
+        // GitHub Packages (for snapshots or internal use)
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/JakkoKoba/JQuill")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+                password = project.findProperty("gpr.token") ?: System.getenv("GITHUB_TOKEN")
+            }
+        }
+
+        // Sonatype OSSRH (Maven Central)
+        maven {
+            name = "Sonatype"
+            url = uri(
+                    version.endsWith("SNAPSHOT")
+                            ? "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+                            : "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            )
+            credentials {
+                username = project.findProperty("ossrhUsername") ?: System.getenv("OSSRH_USERNAME")
+                password = project.findProperty("ossrhPassword") ?: System.getenv("OSSRH_PASSWORD")
+            }
+        }
+    }
 }
 
-// Modern Gradle 9+ way to define sourcesJar
-tasks.register('sourcesJar', Jar) {
-    archiveClassifier.set('sources')
-    from(sourceSets.main.allSource)
-}
-
-artifacts {
-    archives(tasks.named('sourcesJar'))
+signing {
+    // Only sign when keys are provided
+    if (project.hasProperty("signing.keyId") || System.getenv("SIGNING_KEY")) {
+        sign publishing.publications.mavenJava
+    }
 }

@@ -3,6 +3,40 @@ package org.jquill;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/** @param code the ANSI code string
+ * Represents ANSI text styles and colors for terminal output, supporting both foreground and background colors,
+ * text attributes (bold, italic, underline, etc.), and semantic aliases for common debug levels.
+ * This class also provides a locking mechanism to protect segments of text from being restyled when multiple
+ * styles are applied. Locked sections are preserved during processing, ensuring consistent rendering in
+ * multithreaded environments.
+ *
+ * <h2>Core Features:</h2>
+ * <ul>
+ *   <li>Predefined text styles: {@link #BOLD}, {@link #DIM}, {@link #ITALIC}, {@link #UNDERLINE}, {@link #STRIKETHROUGH}, {@link #INVERT}</li>
+ *   <li>Foreground and background colors with RGB, hex, or 256-color codes</li>
+ *   <li>Semantic style aliases for logging: {@link #INFO}, {@link #SUCCESS}, {@link #WARNING}, {@link #ERROR}, {@link #LOG}, {@link #MUTED}</li>
+ *   <li>Locking system: {@link #lock(String)}, {@link #unlock(String)}, {@link #isLocked(String)}</li>
+ *   <li>Style combination: {@link #and(Style)}</li>
+ *   <li>Safe application of multiple styles with {@link #apply(String, Style...)}</li>
+ * </ul>
+ *
+ * <h2>Usage Examples:</h2>
+ * <pre>{@code
+ * String styledMessage = Style.apply("Warning!", Style.WARNING, Style.BOLD);
+ * Debug.println(styledMessage);
+ *
+ * String lockedText = Style.lock("Do not style me");
+ * String combined = Style.apply("Prefix " + lockedText + " Suffix", Style.INFO);
+ * Debug.println(combined);
+ * }</pre>
+ *
+ * <h2>Thread Safety and Locking:</h2>
+ * Locked segments are identified with special ANSI escape sequences to prevent re-styling.
+ * Methods like {@link #processLocks(StringBuilder, String, Style...)} handle locked and unlocked text separately,
+ * ensuring safe styling in multithreaded logging scenarios.
+ *
+ * @see Debug
+ */
 public record Style(String code) {
 
     // ------------------ Core ANSI Reset ------------------
@@ -88,54 +122,119 @@ public record Style(String code) {
     private static final String LOCK_START = "\u001B[?200h";
     private static final String LOCK_END = "\u001B[?200l";
 
-    // Marks text as locked — prevents re-styling during processing.
+    /**
+     * Marks text as locked — prevents re-styling during processing.
+     *
+     * @param msg the text to lock
+     * @return the locked text
+     */
     public static String lock(String msg) {
         return LOCK_START + msg + LOCK_END;
     }
 
-    // Removes lock boundaries from text.
+    /**
+     * Removes lock boundaries from text.
+     *
+     * @param msg the locked text
+     * @return the unlocked text
+     */
     public static String unlock(String msg) {
         return msg.replace(LOCK_START, "").replace(LOCK_END, "");
     }
 
-    // Returns true if the text contains lock delimiters.
+    /**
+     * Checks if a message contains lock delimiters.
+     *
+     * @param msg the message to check
+     * @return true if the text is locked
+     */
     public static boolean isLocked(String msg) {
         return msg.contains(LOCK_START) && msg.contains(LOCK_END);
     }
 
     // ------------------ Core Style Logic ------------------
 
-    // Combines two styles into one composite style.
+    /**
+     * Combines two styles into one composite style.
+     *
+     * @param other the other style
+     * @return a new style representing both
+     */
     public Style and(Style other) {
         return new Style(this.code + other.code);
     }
 
+    /**
+     * Returns the ANSI code for this style.
+     *
+     * @return the ANSI code string
+     */
     public String getCode() {
         return code;
     }
 
     // ------------------ Color Builders ------------------
 
+    /**
+     * Creates a foreground style from RGB values.
+     *
+     * @param r red component (0-255)
+     * @param g green component (0-255)
+     * @param b blue component (0-255)
+     * @return the foreground style
+     */
     public static Style fg(int r, int g, int b) {
         return new Style(String.format("\u001B[38;2;%d;%d;%dm", r, g, b));
     }
 
+    /**
+     * Creates a background style from RGB values.
+     *
+     * @param r red component (0-255)
+     * @param g green component (0-255)
+     * @param b blue component (0-255)
+     * @return the background style
+     */
     public static Style bg(int r, int g, int b) {
         return new Style(String.format("\u001B[48;2;%d;%d;%dm", r, g, b));
     }
 
+    /**
+     * Parses a hex color string as foreground.
+     *
+     * @param hex the hex color string
+     * @return the foreground style
+     */
     public static Style fg(String hex) {
         return parseHex(hex, true);
     }
 
+    /**
+     * Parses a hex color string as background.
+     *
+     * @param hex the hex color string
+     * @return the background color
+     */
     public static Style bg(String hex) {
         return parseHex(hex, false);
     }
 
+    /**
+     * Creates a foreground style from 256-color code.
+     *
+     * @param code the 256-color code (0-255)
+     * @return the foreground style
+     */
     public static Style fg256(int code) {
         return new Style(String.format("\u001B[38;5;%dm", code));
     }
 
+    /**
+     * Creates a background style from 256-color code.
+     *
+     * @param code the 256-color code (0-255)
+     * @return the background style
+     */
     public static Style bg256(int code) {
         return new Style(String.format("\u001B[48;5;%dm", code));
     }
@@ -153,61 +252,75 @@ public record Style(String code) {
 
     // ------------------ Application ------------------
 
-    // Applies one or more styles to a message.
-    // Locked sections are preserved.
+    /**
+     * Applies one or more styles to a message. Locked sections are preserved.
+     *
+     * @param msg    the message to style
+     * @param styles the styles to apply
+     * @return styled text
+     */
     public static String apply(String msg, Style... styles) {
         if (msg == null || msg.isEmpty()) return msg;
         StringBuilder sb = new StringBuilder();
-        // Delegate to processLocks which preserves locked segments and styles the rest.
         return processLocks(sb, msg, styles);
     }
 
-
-    // Opens styles without closing — useful for inline styling.
+    /**
+     * Opens styles without closing — useful for inline styling.
+     *
+     * @param styles the styles to open
+     * @return ANSI codes for styles
+     */
     public static String open(Style... styles) {
         StringBuilder sb = new StringBuilder();
         for (Style s : styles) sb.append(s.code);
         return sb.toString();
     }
 
-    // Returns the ANSI reset code.
+    /**
+     * Returns the ANSI reset code.
+     *
+     * @return reset ANSI code
+     */
     public static String close() {
         return RESET.code;
     }
 
     // ------------------ Lock-Aware Processing ------------------
 
-    // Processes a message, preserving locked segments while applying styles elsewhere.
     private static final Pattern ANSI_PATTERN = Pattern.compile("\u001B\\[[0-9;?]*[A-Za-z]");
 
+    /**
+     * Processes a message, preserving locked segments while applying styles elsewhere.
+     *
+     * @param sb     the string builder to append results to
+     * @param msg    the message to process
+     * @param styles styles to apply
+     * @return the fully styled message
+     */
     public static String processLocks(StringBuilder sb, String msg, Style... styles) {
-        // Split by lock boundaries
         String[] segments = msg.split("(?=\\u001B\\[\\?200h)|(?<=\\u001B\\[\\?200l)");
 
         for (String segment : segments) {
             if (isLocked(segment)) {
-                sb.append(segment); // preserve locked text
+                sb.append(segment);
             } else {
                 Matcher matcher = ANSI_PATTERN.matcher(segment);
                 int lastIdx = 0;
                 while (matcher.find()) {
-                    // Apply styles to the text before the ANSI code
                     if (matcher.start() > lastIdx) {
                         String text = segment.substring(lastIdx, matcher.start());
                         for (Style s : styles) sb.append(s.code);
                         sb.append(text);
-                        sb.append(Style.RESET.code);
+                        sb.append(RESET.code);
                     }
-                    // Append the ANSI sequence itself
                     sb.append(matcher.group());
                     lastIdx = matcher.end();
                 }
-                // Apply styles to remaining text after last ANSI code
                 if (lastIdx < segment.length()) {
                     String text = segment.substring(lastIdx);
                     for (Style s : styles) sb.append(s.code);
-                    sb.append(text);
-                    sb.append(Style.RESET.code);
+                    sb.append(RESET.code);
                 }
             }
         }
