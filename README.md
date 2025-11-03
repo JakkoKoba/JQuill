@@ -1,4 +1,4 @@
-# JQuill — Java Console Utility Library
+# JQuill - Java Console Utility Library
 [![](https://jitpack.io/v/JakkoKoba/JQuill.svg)](https://jitpack.io/#JakkoKoba/JQuill)
 [![](https://img.shields.io/badge/Maven-GitHub%20Packages-blue)](https://github.com/JakkoKoba/JQuill/packages)
 
@@ -16,8 +16,7 @@ Originally designed as a companion to **JCMD**, it provides a concise, styled in
 
 ---
 
-## 🧩 Requirements
-
+## 🧩 Requirements 
 
 | Java | Maven | Gradle |
 |------|-------|-------|
@@ -26,59 +25,28 @@ Originally designed as a companion to **JCMD**, it provides a concise, styled in
 | 24   | ✅     | ✅     |
 | 25   | ✅     | ✅     |
 
+###### For any  issues with versions, please open an issue and we'll make sure to work on it ASAP.
+
 ---
 
 ## ⚙️ Installation
 
-You can include **JQuill** from either **GitHub Packages** or **JitPack**.
-
-### **A) GitHub Packages (Canonical Release)**
-
-Add to your project’s `pom.xml`:
-
+### Maven
 ```xml
-<repositories>
-  <repository>
-    <id>github</id>
-    <url>https://maven.pkg.github.com/JakkoKoba/JQuill</url>
-  </repository>
-</repositories>
-
 <dependency>
-  <groupId>com.github.jakkokoba</groupId>
-  <artifactId>jquill</artifactId>
-  <version>1.0.1</version>
-</dependency>
-```
-> ⚠️ Accessing GitHub Packages requires authentication. Add a GitHub token with read:packages scope in your ~/.m2/settings.xml:
-```xml
-<servers>
-  <server>
-    <id>github</id>
-    <username>YOUR_GITHUB_USERNAME</username>
-    <password>YOUR_GITHUB_TOKEN</password>
-  </server>
-</servers>
-```
-### B) JitPack (Public, No Authentication)
-
-Add the JitPack repository and dependency:
-```xml
-<repositories>
-  <repository>
-    <id>jitpack.io</id>
-    <url>https://jitpack.io</url>
-  </repository>
-</repositories>
-
-<dependency>
-  <groupId>com.github.JakkoKoba</groupId>
-  <artifactId>JQuill</artifactId>
-  <version>1.0.1</version>
+    <groupId>io.github.jakkokoba</groupId>
+    <artifactId>jquill</artifactId>
+    <version>1.0.0</version>
 </dependency>
 ```
 
-## 🧠 Example Usage
+### Gradle
+```groovy
+implementation 'io.github.jakkokoba:jquill:1.0.0'
+```
+> For more information on snippets for JQuill, visit [Maven Central](https://central.sonatype.com/artifact/io.github.jakkokoba/jquill)
+
+## Example Usage
 ```java
 import org.jquill.Debug;
 import org.jquill.Style;

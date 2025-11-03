@@ -6,25 +6,10 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.github.jakkokoba</groupId>
+    <groupId>io.github.jakkokoba</groupId>
     <artifactId>jquill</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
-
-    <distributionManagement>
-        <repository>
-            <id>github</id>
-            <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/JakkoKoba/JQuill</url>
-        </repository>
-    </distributionManagement>
-
-    <repositories>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-    </repositories>
 
     <name>JQuill</name>
     <description>Lightweight Java utility library providing helpful classes and methods to simplify common development tasks.</description>
@@ -39,8 +24,9 @@
 
     <developers>
         <developer>
-            <id>JakkoKoba</id>
+            <id>jakkokoba</id>
             <name>Jakko Koba</name>
+            <email>jakub.pk.koba@gmail.com</email>
             <url>https://github.com/JakkoKoba</url>
         </developer>
     </developers>
@@ -52,13 +38,14 @@
     </scm>
 
     <properties>
-        <maven.compiler.source>24</maven.compiler.source>
-        <maven.compiler.target>24</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <build>
         <plugins>
+            <!-- Compiler plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -69,6 +56,31 @@
                 </configuration>
             </plugin>
 
+            <!-- GPG plugin for signing artifacts -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>3.1.0</version>
+
+                <configuration>
+                    <executable>gpg</executable>
+                    <keyname>9EE91D6B3E0118A43A33FFAB7BC885880528FF13</keyname>
+                </configuration>
+
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+
+
+            <!-- Source jar for JitPack and Maven -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -81,13 +93,38 @@
                         </goals>
                         <configuration>
                             <excludes>
-                                <exclude>
-                                    **/Main.java
-                                </exclude>
+                                <exclude>**/Main.java</exclude>
                             </excludes>
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+
+            <!-- Javadoc jar for Maven Central -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.6.3</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.9.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>central</publishingServerId>
+                    <autoPublish>true</autoPublish>
+                    <waitUntil>published</waitUntil>
+                </configuration>
             </plugin>
         </plugins>
     </build>
