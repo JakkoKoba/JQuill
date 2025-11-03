@@ -77,7 +77,7 @@ jobs:
         id: build
         run: |
           if [ "${{ matrix.build }}" == "maven" ]; then
-            mvn -B clean install
+            mvn -B clean install -Dgpg.skip=true
           else
             gradle --parallel clean build --console=plain
           fi
