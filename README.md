@@ -1,6 +1,5 @@
 # JQuill - Java Console Utility Library
-[![](https://jitpack.io/v/JakkoKoba/JQuill.svg)](https://jitpack.io/#JakkoKoba/JQuill)
-[![](https://img.shields.io/badge/Maven-GitHub%20Packages-blue)](https://github.com/JakkoKoba/JQuill/packages)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.jakkokoba/jquill?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.jakkokoba/jquill)
 
 **JQuill** is a lightweight Java library that simplifies console output, message formatting, and runtime debugging.  
 Originally designed as a companion to **JCMD**, it provides a concise, styled interface for printing information, warnings, and logs with visual clarity.
